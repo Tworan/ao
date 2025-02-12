@@ -329,6 +329,10 @@ def sync_float8_amax_and_scale_history(model: torch.nn.Module, fp8_layers=None) 
             child.fp8_scale_input.copy_(new_input_scales[idx])
             child.fp8_scale_weight.copy_(new_weight_scales[idx])
             child.fp8_scale_grad_output.copy_(new_grad_output_scales[idx])
+            
+            child.fp8_amax_history_input.copy_(fp8_input_amax_history_stack[idx])
+            child.fp8_amax_history_weight.copy_(fp8_weight_amax_history_stack[idx])
+            child.fp8_amax_history_grad_output.copy_(fp8_grad_output_amax_history_stack[idx])
 
     # This allows for the compile to succeed on the inner func and fail on the graph breaks
     # at the beginning and and of syncing
