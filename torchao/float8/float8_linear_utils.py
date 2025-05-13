@@ -18,6 +18,7 @@ from torchao.float8.float8_utils import (
     config_has_stateful_scaling,
 )
 from torchao.float8.stateful_float8_linear import StatefulFloat8Linear
+from torchao.float8.dyt_float8_linear import DyTFloat8Linear
 
 log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
@@ -154,6 +155,41 @@ def convert_to_float8_training(
             m,
             config=config,
         )
+
+    return swap_linear_layers(
+        module,
+        from_float,
+        module_filter_fn=module_filter_fn,
+    )
+
+def _dyt_convert_to_float8_training(
+    module: nn.Module,
+    *,
+    module_filter_fn: Optional[Callable[[nn.Module, str], bool]] = None,
+    config: Float8LinearConfig = None,
+) -> nn.Module:
+    """
+    Swaps `torch.nn.Linear` in `module` with `DyTFloat8Linear`.
+
+    Args:
+        module: Module to modify.
+        module_filter_fn: If specified, only the `torch.nn.Linear` subclasses that
+            that pass the filter function will be swapped. The inputs to the
+            filter function are the module instance and the FQN.
+        config (Float8LinearConfig): configuration for conversion to float8
+
+    Returns:
+     nn.Module: The modified module with swapped linear layers.
+    """
+    if config is None:
+        config = Float8LinearConfig()
+
+
+    from_float = lambda m: DyTFloat8Linear.from_float(
+        m,
+        config=config,
+    )
+
 
     return swap_linear_layers(
         module,
