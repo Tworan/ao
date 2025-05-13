@@ -40,7 +40,7 @@ class DyTFloat8Linear(StatefulFloat8Linear):
 
         input_fp8 = hp_tensor_to_float8_static(
             input,
-            self.DyT.weight.abs().max(), 
+            448. / self.DyT.weight.abs().max(), 
             self.config.cast_config_input.target_dtype,
             self.linear_mm_config,
         )
