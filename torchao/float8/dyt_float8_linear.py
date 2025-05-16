@@ -38,9 +38,12 @@ class DyTFloat8Linear(StatefulFloat8Linear):
     def cast_input_to_float8(self, input: torch.Tensor) -> torch.Tensor:
         assert self.DyT is not None, "DyT module is not initialized."
 
+        with torch.no_grad():
+            _amax = (self.DyT.weight + self.DyT.beta).abs().max()
+
         input_fp8 = hp_tensor_to_float8_static(
             input,
-            448. / self.DyT.weight.abs().max(), 
+            448. / _amax, 
             self.config.cast_config_input.target_dtype,
             self.linear_mm_config,
         )
